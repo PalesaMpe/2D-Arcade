@@ -4,17 +4,46 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
-    public float moveSpeed = 10f;
+    [SerializeField] float moveSpeed = 10f;
     public float jumpSpeed = 10f;
+    public bool lookingRight = true;
     // public GameObject TheBall;
     Rigidbody2D rb;
+    Transform body;
+    Animator anim;
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+    }
+
     void Update()
     {
-       if (Input.GetKey(KeyCode.LeftArrow))
-         transform.Translate(Vector2.left * moveSpeed * Time.deltaTime);
-        if (Input.GetKey(KeyCode.RightArrow))
-            transform.Translate(Vector2.right * moveSpeed * Time.deltaTime);
+        float horizontalInput = Input.GetAxis("Horizontal");
+        anim.enabled = true;
+        rb.velocity = new Vector2(horizontalInput*moveSpeed, rb.velocity.y);
 
-        //transform.Rotate(-Vector3.up, turnSpeed * Time.deltaTime);
+        if ((horizontalInput > 0 && !lookingRight) || (horizontalInput < 0 && lookingRight))
+            Flip();
+
+        else if (horizontalInput > 0)
+        {
+            transform.rotation = Quaternion.Euler(Vector2.zero);
+        }
+        else anim.enabled = false;
+
+        if (Input.GetKey(KeyCode.Space))
+        {
+            rb.velocity = new Vector2( rb.velocity.x, jumpSpeed);
+        }
     }
+
+public void Flip()
+{
+    lookingRight = !lookingRight;
+    Vector3 myScale = transform.localScale;
+    myScale.x *= -1;
+    transform.localScale = myScale;
+}
 }
