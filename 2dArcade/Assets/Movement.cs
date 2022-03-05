@@ -7,6 +7,7 @@ public class Movement : MonoBehaviour
     [SerializeField] float moveSpeed = 10f;
     public float jumpSpeed = 10f;
     public bool lookingRight = true;
+    public bool isJumping = false;
     // public GameObject TheBall;
     Rigidbody2D rb;
     Transform body;
@@ -21,7 +22,7 @@ public class Movement : MonoBehaviour
     void Update()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
-        anim.enabled = true;
+        anim.SetFloat("Speed", Mathf.Abs(horizontalInput));
         rb.velocity = new Vector2(horizontalInput*moveSpeed, rb.velocity.y);
 
         if ((horizontalInput > 0 && !lookingRight) || (horizontalInput < 0 && lookingRight))
@@ -31,15 +32,32 @@ public class Movement : MonoBehaviour
         {
             transform.rotation = Quaternion.Euler(Vector2.zero);
         }
-        else anim.enabled = false;
+        // else anim.enabled = false;
 
         if (Input.GetKey(KeyCode.Space))
         {
-            rb.velocity = new Vector2( rb.velocity.x, jumpSpeed);
+            //rb.velocity = new Vector2( rb.velocity.x, jumpSpeed);
+            if (isJumping == false)
+            {
+                rb.AddForce(Vector2.up * jumpSpeed * Time.deltaTime);
+                anim.SetBool("isJumping", true);
+                isJumping = true;
+            }
+            else { anim.SetBool("isJumping", !isJumping); }
+        }
+
+    }
+
+   void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "isGround")
+        {
+            isJumping = false;
+            //anim.SetBool("isJumping", isJumping);
         }
     }
 
-public void Flip()
+    public void Flip()
 {
     lookingRight = !lookingRight;
     Vector3 myScale = transform.localScale;
